@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>For You 💖</title>
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#fff0f5;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+/* 💌 ENVELOPE SCREEN */
+#startScreen{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:#ffe4ec;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:10;
+}
+
+#openBtn{
+  padding:15px 25px;
+  background:#ff4d6d;
+  color:white;
+  border:none;
+  border-radius:20px;
+  font-size:18px;
+}
+
+/* 🐰 BUNNY */
+.bunny{
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  width:80px;
+  animation:float 3s infinite ease-in-out;
+}
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+  100%{transform:translateY(0)}
+}
+
+/* 💖 CONTENT */
+img{
+  width:150px;
+  border-radius:15px;
+  margin:10px;
+}
+
+.reason{
+  background:white;
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- 💌 START SCREEN -->
+<div id="startScreen">
+  <h2>💌 A message for you</h2>
+  <button id="openBtn">Open 💖</button>
+</div>
+
+<h1 id="name"></h1>
+
+<img id="pfp">
+
+<p id="letter"></p>
+
+<video id="video" controls width="300"></video>
+
+<h2>Reasons 💖</h2>
+<div id="reasons"></div>
+
+<h2>Memories 📸</h2>
+<div id="photos"></div>
+
+<!-- 🐰 YOUR BUNNY -->
+<img class="bunny" src="https://i.imgur.com/6X4KQ0b.png">
+
+<!-- 🎵 MUSIC -->
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9bce08.mp3">
+</audio>
+
+<script type="module">
+import { db, doc, getDoc } from './firebase.js';
+
+const music = document.getElementById("music");
+
+document.getElementById("openBtn").onclick = ()=>{
+  document.getElementById("startScreen").style.display="none";
+  music.play();
+};
+
+async function load(){
+
+  const id = new URLSearchParams(window.location.search).get("id");
+  if(!id) return;
+
+  const snap = await getDoc(doc(db,"users",id));
+  if(!snap.exists()) return;
+
+  const d = snap.data();
+
+  document.getElementById("name").innerText = d.name;
+  document.getElementById("letter").innerText = d.letter;
+  document.getElementById("pfp").src = d.pfp;
+
+  const video = document.getElementById("video");
+  video.src = d.video;
+
+  const rbox = document.getElementById("reasons");
+  d.reasons.forEach(r=>{
+    const div=document.createElement("div");
+    div.className="reason";
+    div.innerText=r;
+    rbox.appendChild(div);
+  });
+
+  const pbox = document.getElementById("photos");
+  d.photos.forEach(p=>{
+    const img=document.createElement("img");
+    img.src=p;
+    pbox.appendChild(img);
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
